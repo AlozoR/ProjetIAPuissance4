@@ -134,7 +134,7 @@ def min_value_ab(s, alpha, beta):
 # print(utility(s))
 
 if __name__ == '__main__':
-    grille = np.zeros((7, 12), dtype=int)
+    grille = np.zeros((6, 12), dtype=int)
     print(grille)
     action = 0
     joueur = rd.randrange(1, 3)
