@@ -12,9 +12,9 @@ def actions(s):
 
 def result(s, a):
     s_prime = s.copy()
-    for i in range(7):
-        if s[6 - i][a] == 0:
-            s_prime[6 - i][a] = joueur_minimax
+    for i in range(6):
+        if s[5 - i][a] == 0:
+            s_prime[5 - i][a] = joueur_minimax
     return s_prime
 
 
@@ -62,25 +62,25 @@ def minimax_decision(s):
         result(s, x)))  # TODO: random pour varier
 
 
-def max_value(s):
-    if terminal_test(s):
+def max_value(s, max_depth, depth):
+    if terminal_test(s) or depth > max_depth:
         return utility(s)
     v = -10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 1
-        v = max(v, min_value(result(s, a)))
+        v = max(v, min_value(result(s, a), max_depth, depth + 1))
     return v
 
 
-def min_value(s):
-    if terminal_test(s):
+def min_value(s, max_depth, depth):
+    if terminal_test(s) or depth > max_depth:
         return utility(s)
     v = 10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
-        v = min(v, max_value(result(s, a)))
+        v = min(v, max_value(result(s, a), max_depth, depth + 1))
     joueur_minimax = 1
     return v
 
