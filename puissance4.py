@@ -19,13 +19,27 @@ def result(s, a):
 
 
 def terminal_test(s):
-    rep = True
-    for j in range(12):
-        if s[0][j] == 0:
-            rep = False
-            break
-
-    return rep
+    for i in range(6):
+        for j in range(12):
+            count = count + 1
+    if count = 42:
+        return return {True, 0}
+    for j in range(9):
+        for i in range(6):
+            if s[i][j] == s[i][j+1] == s[i][j+2] == s[i][j+3]:
+                return {True, s[i][j]}
+    for i in range(3):
+        for j in range(12):
+            if s[i][j] == s[i+1][j] == s[i+2][j] == s[i+3][j]:
+                return {True, s[i][j]}
+    for i in range(3):
+        for j in range(9):
+            if s[i][j] == s[i+1][j+1] == s[i+2][j+2] == s[i+3][j+3]:
+                return {True, s[i][j]}
+    for i in range(3):
+        for j in range(3,12):
+            if s[i][j] == s[i+1][j-1] == s[i+2][j-2] == s[i+3][j-3]:
+                return {True, s[i][j]}
 
 
 def utility(s):
@@ -63,7 +77,7 @@ def minimax_decision(s):
 
 
 def max_value(s, max_depth, depth):
-    if terminal_test(s) or depth > max_depth:
+    if terminal_test(s)[0] or depth > max_depth:
         return utility(s)
     v = -10000
     for a in actions(s):
@@ -74,7 +88,7 @@ def max_value(s, max_depth, depth):
 
 
 def min_value(s, max_depth, depth):
-    if terminal_test(s) or depth > max_depth:
+    if terminal_test(s)[0] or depth > max_depth:
         return utility(s)
     v = 10000
     for a in actions(s):
