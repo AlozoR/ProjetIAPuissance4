@@ -21,7 +21,8 @@ def result(s, a):
 def terminal_test(s):
     for i in range(6):
         for j in range(12):
-            count = count + 1
+            if s[i][j] != 0:
+                count = count + 1
     if count = 42:
         return return {True, 0}
     for j in range(9):
