@@ -1,6 +1,8 @@
 import numpy as np
 import random as rd
 
+numero_coup = 0
+
 
 def actions(s):
     rep = []
@@ -12,35 +14,42 @@ def actions(s):
 
 def result(s, a):
     s_prime = s.copy()
-    for i in range(6):
-        if s[5 - i][a] == 0:
-            s_prime[5 - i][a] = joueur_minimax
+    for i in range(5, -1, -1):
+        if s[i][a] == 0:
+            s_prime[i][a] = joueur_minimax
     return s_prime
 
 
 def terminal_test(s):
-    for i in range(6):
-        for j in range(12):
-            if s[i][j] != 0:
-                count = count + 1
-    if count = 42:
-        return return {True, 0}
+    res = {False, 0}
+    if numero_coup < 7:
+        return res
+    if numero_coup == 42:
+        res = {True, 0}
+    # lignes
     for j in range(9):
-        for i in range(6):
-            if s[i][j] == s[i][j+1] == s[i][j+2] == s[i][j+3]:
+        for i in range(5, -1, -1):
+            if s[i][j] == s[i][j + 1] == s[i][j + 2] == s[i][j + 3] != 0:
                 return {True, s[i][j]}
-    for i in range(3):
+    # colonnes
+    for i in range(5, 2, -1):
         for j in range(12):
-            if s[i][j] == s[i+1][j] == s[i+2][j] == s[i+3][j]:
+            if s[i][j] == s[i - 1][j] == s[i - 2][j] == s[i - 3][j] != 0:
                 return {True, s[i][j]}
-    for i in range(3):
+    # diagonales montantes
+    for i in range(5, 2, -1):
         for j in range(9):
-            if s[i][j] == s[i+1][j+1] == s[i+2][j+2] == s[i+3][j+3]:
+            if s[i][j] == s[i - 1][j + 1] == s[i - 2][j + 2]\
+                    == s[i - 3][j + 3] != 0:
                 return {True, s[i][j]}
-    for i in range(3):
-        for j in range(3,12):
-            if s[i][j] == s[i+1][j-1] == s[i+2][j-2] == s[i+3][j-3]:
+    # diagonales descendantes
+    for i in range(5, 2, -1):
+        for j in range(3, 12):
+            if s[i][j] == s[i - 1][j - 1] == s[i - 2][j - 2]\
+                    == s[i - 3][j - 3] != 0:
                 return {True, s[i][j]}
+
+    return res
 
 
 def utility(s):
