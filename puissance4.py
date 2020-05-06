@@ -1,9 +1,6 @@
 import numpy as np
 import random as rd
 
-numero_coup = 0
-numero_ia = 1
-
 
 def place_pion(grid, colonne, j):
     for i in range(5, -1, -1):
@@ -26,7 +23,7 @@ def result(s, a):
     return s_prime
 
 
-def terminal_test(s):
+def terminal_test(s, numero_coup):
     res = (False, 0)
     if numero_coup < 7:
         return res
@@ -75,30 +72,30 @@ def minimax_decision(s):
     a = actions(s)
     print(a)
     return max(a, key=lambda x: min_value(
-        result(s, x)))  # TODO: random pour varier
+        result(s, x), numero_coup_partie))  # TODO: random pour varier
 
 
-def max_value(s):
-    t = terminal_test(s)
+def max_value(s, numero_coup=1):
+    t = terminal_test(s, numero_coup)
     if t[0]:
         return utility(s, t[1])
     v = -10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = numero_ia
-        v = max(v, min_value(result(s, a)))
+        v = max(v, min_value(result(s, a), numero_coup + 1))
     return v
 
 
-def min_value(s):
-    t = terminal_test(s)
+def min_value(s, numero_coup=1):
+    t = terminal_test(s, numero_coup)
     if t[0]:
         return utility(s, t[1])
     v = 10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = joueur_minimax % 2 + 1
-        v = min(v, max_value(result(s, a)))
+        v = min(v, max_value(result(s, a), numero_coup + 1))
     joueur_minimax = 1
     return v
 
@@ -153,6 +150,9 @@ def min_value_ab(s, alpha, beta):
 
 
 if __name__ == '__main__':
+    numero_coup_partie = 1
+    numero_coup_minmax = 1
+    numero_ia = 1
     grille = np.zeros((6, 12), dtype=int)
     print(grille)
     action = 0
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     joueur_minimax = numero_ia
     # print(minimax_decision(grille))
     # print(alpha_beta_search(grille))
-    while not terminal_test(grille):
+    while not terminal_test(grille, numero_coup_partie)[0]:
         if joueur == numero_ia:
             print("Tour de l'ordinateur")
             action = 0
@@ -175,13 +175,15 @@ if __name__ == '__main__':
                 decision = int(input("Entrer la colonne"))
 
         grille = place_pion(grille, decision, joueur)
+        numero_coup_partie += 1
+        numero_coup_minmax = numero_coup_partie
         joueur = joueur % 2 + 1
         print(grille)
 
-    etat = utility(grille)
-    if etat == 1:
+    etat = terminal_test(grille, numero_coup_partie)[1]
+    if etat == numero_ia:
         print("Victoire de l'ordinateur")
-    elif etat == -1:
+    elif etat == numero_ia % 2 + 1:
         print("Victoire du joueur")
     else:
         print("Égalité")
