@@ -5,6 +5,13 @@ numero_coup = 0
 numero_ia = 1
 
 
+def place_pion(grid, colonne, j):
+    for i in range(5, -1, -1):
+        if grid[i][colonne] == 0:
+            grid[i][colonne] = j
+            return grid
+
+
 def actions(s):
     rep = []
     for j in range(12):
@@ -15,9 +22,7 @@ def actions(s):
 
 def result(s, a):
     s_prime = s.copy()
-    for i in range(5, -1, -1):
-        if s[i][a] == 0:
-            s_prime[i][a] = joueur_minimax
+    s_prime = place_pion(s_prime, a, joueur_minimax)
     return s_prime
 
 
@@ -80,7 +85,7 @@ def max_value(s):
     v = -10000
     for a in actions(s):
         global joueur_minimax
-        joueur_minimax = 1
+        joueur_minimax = numero_ia
         v = max(v, min_value(result(s, a)))
     return v
 
@@ -92,7 +97,7 @@ def min_value(s):
     v = 10000
     for a in actions(s):
         global joueur_minimax
-        joueur_minimax = 2
+        joueur_minimax = joueur_minimax % 2 + 1
         v = min(v, max_value(result(s, a)))
     joueur_minimax = 1
     return v
@@ -146,30 +151,30 @@ def min_value_ab(s, alpha, beta):
 # print(terminal_test(s))
 # print(utility(s))
 
+
 if __name__ == '__main__':
     grille = np.zeros((6, 12), dtype=int)
     print(grille)
     action = 0
     joueur = rd.randrange(1, 3)
-    joueur_minimax = 1
+    joueur_minimax = numero_ia
     # print(minimax_decision(grille))
     # print(alpha_beta_search(grille))
     while not terminal_test(grille):
-        if joueur == 1:
+        if joueur == numero_ia:
             print("Tour de l'ordinateur")
             action = 0
-            # decision = minimax_decision(grille)
-            decision = alpha_beta_search(grille)
+            decision = minimax_decision(grille)
+            # decision = alpha_beta_search(grille)
         else:
             print("Tour du joueur")
             actions_possibles = actions(grille)
             print("Actions possibles : ", actions_possibles)
-            decision = [3, 3]
+            decision = 0
             while decision not in actions_possibles:
-                decision[0] = int(input("Entrer la ligne"))
-                decision[1] = int(input("Entrer la colonne"))
+                decision = int(input("Entrer la colonne"))
 
-        grille[decision[0]][decision[1]] = joueur
+        grille = place_pion(grille, decision, joueur)
         joueur = joueur % 2 + 1
         print(grille)
 
