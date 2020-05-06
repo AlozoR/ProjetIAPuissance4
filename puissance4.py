@@ -2,6 +2,7 @@ import numpy as np
 import random as rd
 
 numero_coup = 0
+numero_ia = 1
 
 
 def actions(s):
@@ -21,58 +22,44 @@ def result(s, a):
 
 
 def terminal_test(s):
-    res = {False, 0}
+    res = (False, 0)
     if numero_coup < 7:
         return res
     if numero_coup == 42:
-        res = {True, 0}
+        res = (True, 0)
     # lignes
     for j in range(9):
         for i in range(5, -1, -1):
             if s[i][j] == s[i][j + 1] == s[i][j + 2] == s[i][j + 3] != 0:
-                return {True, s[i][j]}
+                return True, s[i][j]
     # colonnes
     for i in range(5, 2, -1):
         for j in range(12):
             if s[i][j] == s[i - 1][j] == s[i - 2][j] == s[i - 3][j] != 0:
-                return {True, s[i][j]}
+                return True, s[i][j]
     # diagonales montantes
     for i in range(5, 2, -1):
         for j in range(9):
-            if s[i][j] == s[i - 1][j + 1] == s[i - 2][j + 2]\
+            if s[i][j] == s[i - 1][j + 1] == s[i - 2][j + 2] \
                     == s[i - 3][j + 3] != 0:
-                return {True, s[i][j]}
+                return True, s[i][j]
     # diagonales descendantes
     for i in range(5, 2, -1):
         for j in range(3, 12):
-            if s[i][j] == s[i - 1][j - 1] == s[i - 2][j - 2]\
+            if s[i][j] == s[i - 1][j - 1] == s[i - 2][j - 2] \
                     == s[i - 3][j - 3] != 0:
-                return {True, s[i][j]}
+                return True, s[i][j]
 
     return res
 
 
-def utility(s):
-    rep = 0
-    if (s[0][0] == s[0][1] == s[0][2] == 1
-            or s[0][0] == s[1][0] == s[2][0] == 1
-            or s[0][0] == s[1][1] == s[2][2] == 1
-            or s[1][0] == s[1][1] == s[1][2] == 1
-            or s[2][0] == s[2][1] == s[2][2] == 1
-            or s[0][1] == s[1][1] == s[2][1] == 1
-            or s[2][0] == s[1][1] == s[0][2] == 1
-            or s[0][2] == s[1][2] == s[2][2] == 1):
-        rep = 1
-    elif (s[0][2] == s[1][2] == s[2][2] == 2
-          or s[0][1] == s[1][1] == s[2][1] == 2
-          or s[0][0] == s[0][1] == s[0][2] == 2
-          or s[0][0] == s[1][0] == s[2][0] == 2
-          or s[0][0] == s[1][1] == s[2][2] == 2
-          or s[1][0] == s[1][1] == s[1][2] == 2
-          or s[2][0] == s[2][1] == s[2][2] == 2
-          or s[2][0] == s[1][1] == s[0][2] == 2):
-        rep = -1
-    return rep
+def utility(s, w=0):
+    if w == numero_ia:
+        return 1
+    elif w == 0:
+        return 0
+    else:
+        return -1
 
 
 """Partie 2"""
@@ -86,25 +73,27 @@ def minimax_decision(s):
         result(s, x)))  # TODO: random pour varier
 
 
-def max_value(s, max_depth, depth):
-    if terminal_test(s)[0] or depth > max_depth:
-        return utility(s)
+def max_value(s):
+    t = terminal_test(s)
+    if t[0]:
+        return utility(s, t[1])
     v = -10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 1
-        v = max(v, min_value(result(s, a), max_depth, depth + 1))
+        v = max(v, min_value(result(s, a)))
     return v
 
 
-def min_value(s, max_depth, depth):
-    if terminal_test(s)[0] or depth > max_depth:
-        return utility(s)
+def min_value(s):
+    t = terminal_test(s)
+    if t[0]:
+        return utility(s, t[1])
     v = 10000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
-        v = min(v, max_value(result(s, a), max_depth, depth + 1))
+        v = min(v, max_value(result(s, a)))
     joueur_minimax = 1
     return v
 
