@@ -55,13 +55,52 @@ def terminal_test(s, numero_coup):
     return res
 
 
-def utility(s, w=0):
+def utility_tuple(x, next):
+    somme = 0
+    ones = x.count(1)
+    twos = x.count(2)
+    zeros = 4 - ones - twos
+    if ones == 3 and zeros == 1:
+        if next:
+            return np.inf
+        somme = 500
+    elif ones == 2 and zeros == 2:
+        somme = 200
+    elif ones == 1 and zeros == 3:
+        somme = 50
+    elif twos == 3 and zeros == 1:
+        if not next:
+            return -np.inf
+        somme = -500
+    elif twos == 2 and zeros == 2:
+        somme = -200
+    elif twos == 1 and zeros == 3:
+        somme = -50
+
+    return somme
+
+
+def utility(s, w=-1, next=0):
+    # next = 1 : ia va jouer
+    # next = 0 : adv va jouer
     if w == numero_ia:
-        return 1
+        return np.inf
     elif w == 0:
         return 0
-    else:
-        return -1
+    elif w == numero_ia % 2 + 1:
+        return -np.inf
+
+    somme = 0
+    for i in range(5, -1, -1):
+        for j in range(12):
+            # trucs horizontaux
+            if j < 9:
+                x = (s[i, j], s[i, j + 1], s[i, j + 2], s[i, j + 3])
+                somme += utility_tuple(x, next)
+
+
+
+
 
 
 """Partie 2"""
@@ -100,44 +139,44 @@ def min_value(s, numero_coup=1):
     return v
 
 
-def alpha_beta_search(s):
-    a = actions(s)
-    print(a)
-    return max(a, key=lambda x: min_value_ab(
-        result(s, x), -10000, 10000))
-
-
-def max_value_ab(s, alpha, beta):
-    if terminal_test(s):
-        return utility(s)
-    v = -10000
-    for a in actions(s):
-        global joueur_minimax
-        global action
-        joueur_minimax = 1
-        temp = min_value_ab(result(s, a), alpha, beta)
-        if temp > v:
-            v = temp
-            action = a
-        if v >= beta:
-            return v
-        alpha = max(alpha, v)
-    return v
-
-
-def min_value_ab(s, alpha, beta):
-    if terminal_test(s):
-        return utility(s)
-    v = 10000
-    for a in actions(s):
-        global joueur_minimax
-        joueur_minimax = 2
-        v = min(v, max_value_ab(result(s, a), alpha, beta))
-        if v <= alpha:
-            return v
-        beta = min(beta, v)
-    joueur_minimax = 1
-    return v
+# def alpha_beta_search(s):
+#     a = actions(s)
+#     print(a)
+#     return max(a, key=lambda x: min_value_ab(
+#         result(s, x), -10000, 10000))
+#
+#
+# def max_value_ab(s, alpha, beta):
+#     if terminal_test(s):
+#         return utility(s)
+#     v = -10000
+#     for a in actions(s):
+#         global joueur_minimax
+#         global action
+#         joueur_minimax = 1
+#         temp = min_value_ab(result(s, a), alpha, beta)
+#         if temp > v:
+#             v = temp
+#             action = a
+#         if v >= beta:
+#             return v
+#         alpha = max(alpha, v)
+#     return v
+#
+#
+# def min_value_ab(s, alpha, beta):
+#     if terminal_test(s):
+#         return utility(s)
+#     v = 10000
+#     for a in actions(s):
+#         global joueur_minimax
+#         joueur_minimax = 2
+#         v = min(v, max_value_ab(result(s, a), alpha, beta))
+#         if v <= alpha:
+#             return v
+#         beta = min(beta, v)
+#     joueur_minimax = 1
+#     return v
 
 
 """Test"""
