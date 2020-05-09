@@ -55,13 +55,13 @@ def terminal_test(s, numero_coup):
     return res
 
 
-def utility_tuple(x, next):
+def utility_tuple(x, next_is_us):
     somme = 0
     ones = x.count(1)
     twos = x.count(2)
     zeros = 4 - ones - twos
     if ones == 3 and zeros == 1:
-        if next:
+        if next_is_us:
             return np.inf
         somme = 500
     elif ones == 2 and zeros == 2:
@@ -69,7 +69,7 @@ def utility_tuple(x, next):
     elif ones == 1 and zeros == 3:
         somme = 50
     elif twos == 3 and zeros == 1:
-        if not next:
+        if not next_is_us:
             return -np.inf
         somme = -500
     elif twos == 2 and zeros == 2:
@@ -80,14 +80,14 @@ def utility_tuple(x, next):
     return somme
 
 
-def utility(s, w=-1, next=0):
-    # next = 1 : ia va jouer
-    # next = 0 : adv va jouer
-    if w == numero_ia:
+def utility(s, w=-1, next_is_us=0):
+    # next_is_us = 1 : ia va jouer
+    # next_is_us = 0 : adv va jouer
+    if w == 1:
         return np.inf
     elif w == 0:
         return 0
-    elif w == numero_ia % 2 + 1:
+    elif w == 2:
         return -np.inf
 
     somme = 0
@@ -96,11 +96,21 @@ def utility(s, w=-1, next=0):
             # trucs horizontaux
             if j < 9:
                 x = (s[i, j], s[i, j + 1], s[i, j + 2], s[i, j + 3])
-                somme += utility_tuple(x, next)
-
-
-
-
+                somme += utility_tuple(x, next_is_us)
+            # trucs verticaux
+            if i > 2:
+                x = (s[i, j], s[i - 1, j], s[i - 2, j], s[i - 3, j])
+                somme += utility_tuple(x, next_is_us)
+            # trucs diagonaux droite
+            if j < 9 and i > 2:
+                x = (s[i, j], s[i - 1, j + 1], s[i - 2, j + 2], s[i - 3, j + 3])
+                somme += utility_tuple(x, next_is_us)
+            # trucs diagonaux gauche
+            if j > 2 and i > 2:
+                x = (s[i, j], s[i - 1, j - 1], s[i - 2, j - 2], s[i - 3, j - 3])
+                somme += utility_tuple(x, next_is_us)
+    
+    return somme
 
 
 """Partie 2"""
@@ -114,27 +124,27 @@ def minimax_decision(s):
         result(s, x), numero_coup_partie))  # TODO: random pour varier
 
 
-def max_value(s, numero_coup=1):
+def max_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
-    if t[0]:
+    if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
     v = -10000
     for a in actions(s):
         global joueur_minimax
-        joueur_minimax = numero_ia
-        v = max(v, min_value(result(s, a), numero_coup + 1))
+        joueur_minimax = 1
+        v = max(v, min_value(result(s, a), numero_coup + 1, profondeur + 1))
     return v
 
 
-def min_value(s, numero_coup=1):
+def min_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
-    if t[0]:
+    if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
     v = 10000
     for a in actions(s):
         global joueur_minimax
-        joueur_minimax = joueur_minimax % 2 + 1
-        v = min(v, max_value(result(s, a), numero_coup + 1))
+        joueur_minimax = 2
+        v = min(v, max_value(result(s, a), numero_coup + 1, profondeur + 1))
     joueur_minimax = 1
     return v
 
@@ -189,18 +199,18 @@ def min_value(s, numero_coup=1):
 
 
 if __name__ == '__main__':
+    limite_profondeur = 10
     numero_coup_partie = 1
     numero_coup_minmax = 1
-    numero_ia = 1
     grille = np.zeros((6, 12), dtype=int)
     print(grille)
     action = 0
     joueur = rd.randrange(1, 3)
-    joueur_minimax = numero_ia
+    joueur_minimax = 1
     # print(minimax_decision(grille))
     # print(alpha_beta_search(grille))
     while not terminal_test(grille, numero_coup_partie)[0]:
-        if joueur == numero_ia:
+        if joueur == 1:
             print("Tour de l'ordinateur")
             action = 0
             decision = minimax_decision(grille)
@@ -220,9 +230,9 @@ if __name__ == '__main__':
         print(grille)
 
     etat = terminal_test(grille, numero_coup_partie)[1]
-    if etat == numero_ia:
+    if etat == 1:
         print("Victoire de l'ordinateur")
-    elif etat == numero_ia % 2 + 1:
+    elif etat == 2:
         print("Victoire du joueur")
     else:
         print("Égalité")
