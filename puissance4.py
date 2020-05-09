@@ -24,7 +24,7 @@ def result(s, a):
 
 
 def terminal_test(s, numero_coup):
-    res = (False, 0)
+    res = (False, -1)
     if numero_coup < 7:
         return res
     if numero_coup == 42:
@@ -62,7 +62,7 @@ def utility_tuple(x, next_is_us):
     zeros = 4 - ones - twos
     if ones == 3 and zeros == 1:
         if next_is_us:
-            return np.inf
+            return 10000
         somme = 500
     elif ones == 2 and zeros == 2:
         somme = 200
@@ -70,7 +70,7 @@ def utility_tuple(x, next_is_us):
         somme = 50
     elif twos == 3 and zeros == 1:
         if not next_is_us:
-            return -np.inf
+            return -10000
         somme = -500
     elif twos == 2 and zeros == 2:
         somme = -200
@@ -84,11 +84,11 @@ def utility(s, w=-1, next_is_us=0):
     # next_is_us = 1 : ia va jouer
     # next_is_us = 0 : adv va jouer
     if w == 1:
-        return np.inf
+        return 100000
     elif w == 0:
         return 0
     elif w == 2:
-        return -np.inf
+        return -100000
 
     somme = 0
     for i in range(5, -1, -1):
@@ -128,7 +128,7 @@ def max_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
-    v = -10000
+    v = -1000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 1
@@ -140,7 +140,7 @@ def min_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
-    v = 10000
+    v = 1000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
@@ -153,14 +153,14 @@ def alpha_beta_search(s):
     a = actions(s)
     print(a)
     return max(a, key=lambda x: min_value_ab(
-        result(s, x), -10000, 10000, numero_coup_partie))
+        result(s, x), -1000000, 1000000, numero_coup_partie))
 
 
 def max_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
-        return utility(s)
-    v = -10000
+        return utility(s, t[1])
+    v = -1000000
     for a in actions(s):
         global joueur_minimax
         global action
@@ -179,8 +179,8 @@ def max_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
 def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
-        return utility(s)
-    v = 10000
+        return utility(s, t[1])
+    v = 1000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
@@ -203,13 +203,31 @@ def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
 
 
 if __name__ == '__main__':
-    limite_profondeur = 5
+    limite_profondeur = 3
     numero_coup_partie = 1
     numero_coup_minmax = 1
     grille = np.zeros((6, 12), dtype=int)
+    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+    #                    [0, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0],
+    #                    [0, 2, 2, 1, 0, 0, 2, 2, 0, 0, 0, 0],
+    #                    [1, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 0]])
+    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0]])
+    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0],
+    #                    [0, 0, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0],
+    #                    [0, 1, 2, 1, 1, 2, 2, 0, 1, 0, 0, 0]])
     print(grille)
     action = 0
-    joueur = rd.randrange(1, 3)
+    joueur = 1
     joueur_minimax = 1
     # print(minimax_decision(grille))
     # print(alpha_beta_search(grille))
@@ -217,8 +235,8 @@ if __name__ == '__main__':
         if joueur == 1:
             print("Tour de l'ordinateur")
             action = 0
-            decision = minimax_decision(grille)
-            # decision = alpha_beta_search(grille)
+            # decision = minimax_decision(grille)
+            decision = alpha_beta_search(grille)
         else:
             print("Tour du joueur")
             actions_possibles = actions(grille)
