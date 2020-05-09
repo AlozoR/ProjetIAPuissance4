@@ -109,7 +109,7 @@ def utility(s, w=-1, next_is_us=0):
             if j > 2 and i > 2:
                 x = (s[i, j], s[i - 1, j - 1], s[i - 2, j - 2], s[i - 3, j - 3])
                 somme += utility_tuple(x, next_is_us)
-    
+
     return somme
 
 
@@ -149,44 +149,48 @@ def min_value(s, numero_coup=1, profondeur=1):
     return v
 
 
-# def alpha_beta_search(s):
-#     a = actions(s)
-#     print(a)
-#     return max(a, key=lambda x: min_value_ab(
-#         result(s, x), -10000, 10000))
-#
-#
-# def max_value_ab(s, alpha, beta):
-#     if terminal_test(s):
-#         return utility(s)
-#     v = -10000
-#     for a in actions(s):
-#         global joueur_minimax
-#         global action
-#         joueur_minimax = 1
-#         temp = min_value_ab(result(s, a), alpha, beta)
-#         if temp > v:
-#             v = temp
-#             action = a
-#         if v >= beta:
-#             return v
-#         alpha = max(alpha, v)
-#     return v
-#
-#
-# def min_value_ab(s, alpha, beta):
-#     if terminal_test(s):
-#         return utility(s)
-#     v = 10000
-#     for a in actions(s):
-#         global joueur_minimax
-#         joueur_minimax = 2
-#         v = min(v, max_value_ab(result(s, a), alpha, beta))
-#         if v <= alpha:
-#             return v
-#         beta = min(beta, v)
-#     joueur_minimax = 1
-#     return v
+def alpha_beta_search(s):
+    a = actions(s)
+    print(a)
+    return max(a, key=lambda x: min_value_ab(
+        result(s, x), -10000, 10000, numero_coup_partie))
+
+
+def max_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
+    t = terminal_test(s, numero_coup)
+    if t[0] or profondeur >= limite_profondeur:
+        return utility(s)
+    v = -10000
+    for a in actions(s):
+        global joueur_minimax
+        global action
+        joueur_minimax = 1
+        temp = min_value_ab(result(s, a), alpha, beta, numero_coup + 1,
+                            profondeur + 1)
+        if temp > v:
+            v = temp
+            action = a
+        if v >= beta:
+            return v
+        alpha = max(alpha, v)
+    return v
+
+
+def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
+    t = terminal_test(s, numero_coup)
+    if t[0] or profondeur >= limite_profondeur:
+        return utility(s)
+    v = 10000
+    for a in actions(s):
+        global joueur_minimax
+        joueur_minimax = 2
+        v = min(v, max_value_ab(result(s, a), alpha, beta, numero_coup + 1,
+                                profondeur + 1))
+        if v <= alpha:
+            return v
+        beta = min(beta, v)
+    joueur_minimax = 1
+    return v
 
 
 """Test"""
@@ -199,7 +203,7 @@ def min_value(s, numero_coup=1, profondeur=1):
 
 
 if __name__ == '__main__':
-    limite_profondeur = 10
+    limite_profondeur = 5
     numero_coup_partie = 1
     numero_coup_minmax = 1
     grille = np.zeros((6, 12), dtype=int)
@@ -219,7 +223,7 @@ if __name__ == '__main__':
             print("Tour du joueur")
             actions_possibles = actions(grille)
             print("Actions possibles : ", actions_possibles)
-            decision = 0
+            decision = -1
             while decision not in actions_possibles:
                 decision = int(input("Entrer la colonne"))
 
