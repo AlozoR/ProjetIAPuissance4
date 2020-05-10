@@ -160,7 +160,7 @@ def utility(s, w=-1, next_is_us=0):
 def minimax_decision(s):
     # print(s)
     a = actions(s)
-    print(a)
+    # print(a)
     return max(a, key=lambda x: min_value(
         result(s, x), numero_coup_partie))  # TODO: random pour varier
 
@@ -192,7 +192,7 @@ def min_value(s, numero_coup=1, profondeur=1):
 
 def alpha_beta_search(s):
     a = actions(s)
-    print(a)
+    # print(a)
     return max(a, key=lambda x: min_value_ab(
         result(s, x), -10000000, 10000000, numero_coup_partie))
 
@@ -282,21 +282,23 @@ if __name__ == '__main__':
     action = 0
     joueur = rd.randrange(1, 3)
     joueur_minimax = 1
-    print(minimax_decision(grille))
-    print(alpha_beta_search(grille))
+    # print(minimax_decision(grille))
+    # print(alpha_beta_search(grille))
     while not terminal_test(grille, numero_coup_partie - 1)[0]:
         if joueur == 1:
             print("Tour de l'ordinateur")
             action = 0
             # decision = minimax_decision(grille)
             decision = alpha_beta_search(grille)
+            print("Décision de l'IA : ", decision)
         else:
             print("Tour du joueur")
             actions_possibles = actions(grille)
+            actions_possibles = [x + 1 for x in actions_possibles]
             print("Actions possibles : ", actions_possibles)
             decision = -1
             while decision not in actions_possibles:
-                decision = int(input("Entrer la colonne"))
+                decision = int(input("Entrer la colonne > ")) - 1
 
         grille = place_pion(grille, decision, joueur)
         numero_coup_partie += 1
