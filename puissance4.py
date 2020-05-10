@@ -1,5 +1,6 @@
 import numpy as np
 import random as rd
+import time
 
 
 def affichage(plateau):
@@ -279,6 +280,7 @@ if __name__ == '__main__':
     #                    [2, 0, 2, 0, 2, 1, 1, 1, 0, 0, 0, 0]])
     # print(grille)
     affichage(grille)
+    print('Tour numéro ', numero_coup_partie)
     action = 0
     joueur = rd.randrange(1, 3)
     joueur_minimax = 1
@@ -287,10 +289,13 @@ if __name__ == '__main__':
     while not terminal_test(grille, numero_coup_partie - 1)[0]:
         if joueur == 1:
             print("Tour de l'ordinateur")
+            start = time.time()
             action = 0
             # decision = minimax_decision(grille)
             decision = alpha_beta_search(grille)
-            print("Décision de l'IA : ", decision)
+            end = time.time()
+            print("Décision de l'IA : ", decision + 1)
+            print('Temps de la décision :', end - start, 'secondes')
         else:
             print("Tour du joueur")
             actions_possibles = actions(grille)
@@ -298,15 +303,20 @@ if __name__ == '__main__':
             print("Actions possibles : ", actions_possibles)
             decision = -1
             while decision not in actions_possibles:
-                decision = int(input("Entrer la colonne > ")) - 1
+                try:
+                    decision = int(input("Entrer la colonne > "))
+                except ValueError:
+                    decision = -1
+            decision -= 1
 
         grille = place_pion(grille, decision, joueur)
         numero_coup_partie += 1
         joueur = joueur % 2 + 1
         # print(grille)
         affichage(grille)
+        print('Tour numéro ', numero_coup_partie)
 
-    etat = terminal_test(grille, numero_coup_partie)[1]
+    etat = terminal_test(grille, numero_coup_partie - 1)[1]
     if etat == 1:
         print("Victoire de l'ordinateur")
     elif etat == 2:
