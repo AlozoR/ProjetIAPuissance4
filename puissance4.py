@@ -1,29 +1,39 @@
+# https://colab.research.google.com/drive/1wHtBWBeEUUoQoFK2aN6ecgC_pd-LLRdW?usp=sharing
+
 import numpy as np
 import random as rd
 import time
 
+CRED = '\33[31m'
+CEND = '\033[0m'
+CBLUE = '\33[34m'
 
-def affichage(plateau):
-    ch = ""
-    # Affichage première ligne d'indexage
-    for i in range(1, 13):
-        if i < 10:
-            ch += str(i) + " |"
-        else:
-            ch += str(i) + "|"
-    print(ch)
 
-    # Affichage du plateau
+def print_grille():
     for i in range(6):
-        ch = ""  # rénitialisation de la châine
+        print("|", end=' ')
         for j in range(12):
-            if plateau[i][j] == 1:
-                ch += "X |"
-            elif plateau[i][j] == 2:
-                ch += "O |"
+            if grille[i][j] == 1:
+                print(CBLUE + '\u25cf' + CEND, end=' ')
+            elif grille[i][j] == 2:
+                print(CRED + '\u25cf' + CEND, end=' ')
             else:
-                ch += "  |"
-        print(ch)
+                print(" ", end=' ')
+            print("|", end=' ')
+        print()
+    print("|", end=' ')
+    for i in range(12):
+        print("\u0305 ", end=" ")
+        print("|", end=' ')
+    print()
+    print("|", end=' ')
+    for i in range(12):
+        if i < 9:
+            print(i + 1, end=" ")
+        else:
+            print(i + 1, end='')
+        print("|", end=' ')
+    print()
 
 
 def place_pion(grid, colonne, j):
@@ -89,7 +99,7 @@ def utility_tuple(x, next_is_us, s, i, j):
         ind_z_abs = i - ind_z_rel if x[4] == 'dm' \
             else \
             i + ind_z_rel if x[4] == 'dd' \
-            else i
+                else i
         if next_is_us \
                 and (x[4] == 'v'
                      or ind_z_abs == 5
@@ -105,7 +115,7 @@ def utility_tuple(x, next_is_us, s, i, j):
         ind_z_abs = i - ind_z_rel if x[4] == 'dm' \
             else \
             i + ind_z_rel if x[4] == 'dd' \
-            else i
+                else i
         if not next_is_us \
                 and (x[4] == 'v'
                      or ind_z_abs == 5
@@ -133,20 +143,20 @@ def utility(s, w=-1, next_is_us=0):
     somme = 0
     for i in range(5, -1, -1):
         for j in range(12):
-            # trucs horizontaux
+            # lignes
             if j < 9:
                 x = (s[i, j], s[i, j + 1], s[i, j + 2], s[i, j + 3], 'l')
                 somme += utility_tuple(x, next_is_us, s, i, j)
-            # trucs verticaux
+            # colonnes
             if i > 2 and not s[i, j]:
                 x = (s[i, j], s[i - 1, j], s[i - 2, j], s[i - 3, j], 'v')
                 somme += utility_tuple(x, next_is_us, s, i, j)
-            # trucs diagonaux montants
+            # diagonales montantes
             if j < 9 and i > 2:
                 x = (s[i, j], s[i - 1, j + 1], s[i - 2, j + 2], s[i - 3, j + 3],
                      'dm')
                 somme += utility_tuple(x, next_is_us, s, i, j)
-            # trucs diagonaux descendants
+            # diagonales descendantes
             if j < 9 and i < 3:
                 x = (s[i, j], s[i + 1, j + 1], s[i + 2, j + 2], s[i + 3, j + 3],
                      'dd')
@@ -163,7 +173,7 @@ def minimax_decision(s):
     a = actions(s)
     # print(a)
     return max(a, key=lambda x: min_value(
-        result(s, x), numero_coup_partie))  # TODO: random pour varier
+        result(s, x), numero_coup_partie))
 
 
 def max_value(s, numero_coup=1, profondeur=1):
@@ -245,81 +255,100 @@ def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
 
 
 if __name__ == '__main__':
-    limite_profondeur = 3
-    numero_coup_partie = 1
-    grille = np.zeros((6, 12), dtype=int)
-    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-    #                    [0, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0],
-    #                    [0, 2, 2, 1, 0, 0, 2, 2, 0, 0, 0, 0],
-    #                    [1, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 0]])
-    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0]])
-    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0],
-    #                    [0, 0, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0],
-    #                    [0, 1, 2, 1, 1, 2, 2, 0, 1, 0, 0, 0]])
-    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0],
-    #                    [0, 0, 2, 1, 0, 0, 1, 2, 2, 0, 0, 0],
-    #                    [2, 0, 1, 1, 0, 0, 1, 1, 2, 2, 0, 0],
-    #                    [1, 0, 2, 1, 1, 0, 2, 2, 1, 1, 1, 2]])
-    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0],
-    #                    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-    #                    [2, 0, 2, 0, 2, 1, 1, 1, 0, 0, 0, 0]])
-    # print(grille)
-    affichage(grille)
-    print('Tour numéro ', numero_coup_partie)
-    action = 0
-    joueur = rd.randrange(1, 3)
-    joueur_minimax = 1
-    # print(minimax_decision(grille))
-    # print(alpha_beta_search(grille))
-    while not terminal_test(grille, numero_coup_partie - 1)[0]:
-        if joueur == 1:
-            print("Tour de l'ordinateur")
-            start = time.time()
-            action = 0
-            # decision = minimax_decision(grille)
-            decision = alpha_beta_search(grille)
-            end = time.time()
-            print("Décision de l'IA : ", decision + 1)
-            print('Temps de la décision :', end - start, 'secondes')
-        else:
-            print("Tour du joueur")
-            actions_possibles = actions(grille)
-            actions_possibles = [x + 1 for x in actions_possibles]
-            print("Actions possibles : ", actions_possibles)
-            decision = -1
-            while decision not in actions_possibles:
-                try:
-                    decision = int(input("Entrer la colonne > "))
-                except ValueError:
-                    decision = -1
-            decision -= 1
-
-        grille = place_pion(grille, decision, joueur)
-        numero_coup_partie += 1
-        joueur = joueur % 2 + 1
+    continuer = 1
+    while continuer:
+        print('\n\nDébut de partie\n')
+        limite_profondeur = 3
+        numero_coup_partie = 1
+        grille = np.zeros((6, 12), dtype=int)
+        # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+        #                    [0, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0],
+        #                    [0, 2, 2, 1, 0, 0, 2, 2, 0, 0, 0, 0],
+        #                    [1, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 0]])
+        # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0]])
+        # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0],
+        #                    [0, 0, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0],
+        #                    [0, 1, 2, 1, 1, 2, 2, 0, 1, 0, 0, 0]])
+        # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0],
+        #                    [0, 0, 2, 1, 0, 0, 1, 2, 2, 0, 0, 0],
+        #                    [2, 0, 1, 1, 0, 0, 1, 1, 2, 2, 0, 0],
+        #                    [1, 0, 2, 1, 1, 0, 2, 2, 1, 1, 1, 2]])
+        # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0],
+        #                    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+        #                    [2, 0, 2, 0, 2, 1, 1, 1, 0, 0, 0, 0]])
         # print(grille)
-        affichage(grille)
+        # affichage(grille)
+        print_grille()
         print('Tour numéro ', numero_coup_partie)
+        action = 0
+        joueur = 0
+        while not (joueur == 1 or joueur == 2):
+            try:
+                joueur = int(input('Entrer le joueur qui commence ' +
+                                   '(1: ordinateur, 2: joueur)\n> '))
+            except ValueError:
+                joueur = 0
+        joueur_minimax = 1
+        # print(minimax_decision(grille))
+        # print(alpha_beta_search(grille))
+        while not terminal_test(grille, numero_coup_partie - 1)[0]:
+            if joueur == 1:
+                print("Tour de l'ordinateur")
+                start = time.time()
+                action = 0
+                # decision = minimax_decision(grille)
+                decision = alpha_beta_search(grille)
+                end = time.time()
+                print("Décision de l'IA : ", decision + 1)
+                print('Temps de la décision :', end - start, 'secondes')
+            else:
+                print("Tour du joueur")
+                actions_possibles = actions(grille)
+                actions_possibles = [x + 1 for x in actions_possibles]
+                print("Actions possibles : ", actions_possibles)
+                decision = -1
+                while decision not in actions_possibles:
+                    try:
+                        decision = int(input('Entrer la colonne\n> '))
+                    except ValueError:
+                        decision = -1
+                decision -= 1
 
-    etat = terminal_test(grille, numero_coup_partie - 1)[1]
-    if etat == 1:
-        print("Victoire de l'ordinateur")
-    elif etat == 2:
-        print("Victoire du joueur")
-    else:
-        print("Égalité")
+            grille = place_pion(grille, decision, joueur)
+            numero_coup_partie += 1
+            joueur = joueur % 2 + 1
+            # print(grille)
+            # affichage(grille)
+            print_grille()
+            print('Tour numéro ', numero_coup_partie)
+
+        etat = terminal_test(grille, numero_coup_partie - 1)[1]
+        if etat == 1:
+            print("Victoire de l'ordinateur")
+        elif etat == 2:
+            print("Victoire du joueur")
+        else:
+            print("Égalité")
+
+        continuer = -1
+        while not (continuer == 1 or continuer == 0):
+            try:
+                continuer = int(input('Voulez-vous rejouer ? (0/1)\n> '))
+            except ValueError:
+                continuer = -1
+
