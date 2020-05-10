@@ -2,6 +2,29 @@ import numpy as np
 import random as rd
 
 
+def affichage(plateau):
+    ch = ""
+    # Affichage première ligne d'indexage
+    for i in range(1, 13):
+        if i < 10:
+            ch += str(i) + " |"
+        else:
+            ch += str(i) + "|"
+    print(ch)
+
+    # Affichage du plateau
+    for i in range(6):
+        ch = ""  # rénitialisation de la châine
+        for j in range(12):
+            if plateau[i][j] == 1:
+                ch += "X |"
+            elif plateau[i][j] == 2:
+                ch += "O |"
+            else:
+                ch += "  |"
+        print(ch)
+
+
 def place_pion(grid, colonne, j):
     for i in range(5, -1, -1):
         if grid[i][colonne] == 0:
@@ -55,21 +78,37 @@ def terminal_test(s, numero_coup):
     return res
 
 
-def utility_tuple(x, next_is_us):
+def utility_tuple(x, next_is_us, s, i, j):
     somme = 0
     ones = x.count(1)
     twos = x.count(2)
     zeros = 4 - ones - twos
     if ones == 3 and zeros == 1:
-        if next_is_us:
-            return 10000
+        ind_z_rel = x.index(0)
+        ind_z_abs = i - ind_z_rel if x[4] == 'dm' \
+            else \
+            i + ind_z_rel if x[4] == 'dd' \
+            else i
+        if next_is_us \
+                and (x[4] == 'v'
+                     or ind_z_abs == 5
+                     or s[ind_z_abs + 1, j + ind_z_rel]):
+            return 20000
         somme = 500
     elif ones == 2 and zeros == 2:
         somme = 200
     elif ones == 1 and zeros == 3:
         somme = 50
     elif twos == 3 and zeros == 1:
-        if not next_is_us:
+        ind_z_rel = x.index(0)
+        ind_z_abs = i - ind_z_rel if x[4] == 'dm' \
+            else \
+            i + ind_z_rel if x[4] == 'dd' \
+            else i
+        if not next_is_us \
+                and (x[4] == 'v'
+                     or ind_z_abs == 5
+                     or s[ind_z_abs + 1, j + ind_z_rel]):
             return -10000
         somme = -500
     elif twos == 2 and zeros == 2:
@@ -84,31 +123,33 @@ def utility(s, w=-1, next_is_us=0):
     # next_is_us = 1 : ia va jouer
     # next_is_us = 0 : adv va jouer
     if w == 1:
-        return 100000
+        return 1000000
     elif w == 0:
         return 0
     elif w == 2:
-        return -100000
+        return -1000000
 
     somme = 0
     for i in range(5, -1, -1):
         for j in range(12):
             # trucs horizontaux
             if j < 9:
-                x = (s[i, j], s[i, j + 1], s[i, j + 2], s[i, j + 3])
-                somme += utility_tuple(x, next_is_us)
+                x = (s[i, j], s[i, j + 1], s[i, j + 2], s[i, j + 3], 'l')
+                somme += utility_tuple(x, next_is_us, s, i, j)
             # trucs verticaux
-            if i > 2:
-                x = (s[i, j], s[i - 1, j], s[i - 2, j], s[i - 3, j])
-                somme += utility_tuple(x, next_is_us)
-            # trucs diagonaux droite
+            if i > 2 and not s[i, j]:
+                x = (s[i, j], s[i - 1, j], s[i - 2, j], s[i - 3, j], 'v')
+                somme += utility_tuple(x, next_is_us, s, i, j)
+            # trucs diagonaux montants
             if j < 9 and i > 2:
-                x = (s[i, j], s[i - 1, j + 1], s[i - 2, j + 2], s[i - 3, j + 3])
-                somme += utility_tuple(x, next_is_us)
-            # trucs diagonaux gauche
-            if j > 2 and i > 2:
-                x = (s[i, j], s[i - 1, j - 1], s[i - 2, j - 2], s[i - 3, j - 3])
-                somme += utility_tuple(x, next_is_us)
+                x = (s[i, j], s[i - 1, j + 1], s[i - 2, j + 2], s[i - 3, j + 3],
+                     'dm')
+                somme += utility_tuple(x, next_is_us, s, i, j)
+            # trucs diagonaux descendants
+            if j < 9 and i < 3:
+                x = (s[i, j], s[i + 1, j + 1], s[i + 2, j + 2], s[i + 3, j + 3],
+                     'dd')
+                somme += utility_tuple(x, next_is_us, s, i, j)
 
     return somme
 
@@ -127,8 +168,8 @@ def minimax_decision(s):
 def max_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
-        return utility(s, t[1])
-    v = -1000000
+        return utility(s, t[1], 1)
+    v = -10000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 1
@@ -139,8 +180,8 @@ def max_value(s, numero_coup=1, profondeur=1):
 def min_value(s, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
-        return utility(s, t[1])
-    v = 1000000
+        return utility(s, t[1], 0)
+    v = 10000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
@@ -153,14 +194,14 @@ def alpha_beta_search(s):
     a = actions(s)
     print(a)
     return max(a, key=lambda x: min_value_ab(
-        result(s, x), -1000000, 1000000, numero_coup_partie))
+        result(s, x), -10000000, 10000000, numero_coup_partie))
 
 
 def max_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
-    v = -1000000
+    v = -10000000
     for a in actions(s):
         global joueur_minimax
         global action
@@ -180,7 +221,7 @@ def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
     t = terminal_test(s, numero_coup)
     if t[0] or profondeur >= limite_profondeur:
         return utility(s, t[1])
-    v = 1000000
+    v = 10000000
     for a in actions(s):
         global joueur_minimax
         joueur_minimax = 2
@@ -205,7 +246,6 @@ def min_value_ab(s, alpha, beta, numero_coup=1, profondeur=1):
 if __name__ == '__main__':
     limite_profondeur = 3
     numero_coup_partie = 1
-    numero_coup_minmax = 1
     grille = np.zeros((6, 12), dtype=int)
     # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -225,13 +265,26 @@ if __name__ == '__main__':
     #                    [0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0],
     #                    [0, 0, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0],
     #                    [0, 1, 2, 1, 1, 2, 2, 0, 1, 0, 0, 0]])
-    print(grille)
+    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0],
+    #                    [0, 0, 2, 1, 0, 0, 1, 2, 2, 0, 0, 0],
+    #                    [2, 0, 1, 1, 0, 0, 1, 1, 2, 2, 0, 0],
+    #                    [1, 0, 2, 1, 1, 0, 2, 2, 1, 1, 1, 2]])
+    # grille = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0],
+    #                    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+    #                    [2, 0, 2, 0, 2, 1, 1, 1, 0, 0, 0, 0]])
+    # print(grille)
+    affichage(grille)
     action = 0
-    joueur = 1
+    joueur = rd.randrange(1, 3)
     joueur_minimax = 1
-    # print(minimax_decision(grille))
-    # print(alpha_beta_search(grille))
-    while not terminal_test(grille, numero_coup_partie)[0]:
+    print(minimax_decision(grille))
+    print(alpha_beta_search(grille))
+    while not terminal_test(grille, numero_coup_partie - 1)[0]:
         if joueur == 1:
             print("Tour de l'ordinateur")
             action = 0
@@ -247,9 +300,9 @@ if __name__ == '__main__':
 
         grille = place_pion(grille, decision, joueur)
         numero_coup_partie += 1
-        numero_coup_minmax = numero_coup_partie
         joueur = joueur % 2 + 1
-        print(grille)
+        # print(grille)
+        affichage(grille)
 
     etat = terminal_test(grille, numero_coup_partie)[1]
     if etat == 1:
